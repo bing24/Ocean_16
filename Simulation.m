@@ -390,13 +390,13 @@ classdef Simulation < handle
                     c=fix(clock);
                     cstr=strcat(mat2str(c),'.avi');
                     SimulationVideo = VideoWriter(cstr);
-                    SimulationVideo.FrameRate = 5; % Barzin tried to slow the video 2/4/2016
+                    SimulationVideo.FrameRate = 50; % Barzin tried to slow the video 2/4/2016
                     open(SimulationVideo);
                     
                     set(gca,'nextplot','replacechildren');
                     set(gcf,'Renderer','zbuffer');
                     obj.plot();
-                    axis([-0 27 -6 21]);
+                    axis([-0 15 -0 12]);
                     % axis([-123.9075  130.7855 -103.0364   113.1102]); uncomment for circle
                     for i=1:obj.simulation_time
                         obj.plot(i);

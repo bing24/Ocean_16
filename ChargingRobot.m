@@ -95,11 +95,11 @@ classdef ChargingRobot < handle
                 end
                 p2=[obj.trajectory_x(time) obj.trajectory_y(time)];
 
-                if p1(1)>=p2(1)
-                    [workerimage,~,alpha]=imread('cr.png');
-                sita = atan2(p2(2)-p1(2),p2(1)-p1(1))*180/pi-15;
+                if p1(1)<=p2(1)
+                    [workerimage,~,alpha]=imread('static.png');
+                sita = atan2(p2(2)-p1(2),p2(1)-p1(1))*180/pi;
                 else
-                 [workerimage,~,alpha]=imread('crf.png');
+                 [workerimage,~,alpha]=imread('static.png');
                  sita = atan2(p2(2)-p1(2),p2(1)-p1(1))*180/pi+15+180;
                 end
                 if isnan(sita)
@@ -107,14 +107,14 @@ classdef ChargingRobot < handle
                 end
 
                 
-                workerrotate=imrotate(workerimage,-sita);
-                alpharotate=imrotate(alpha,-sita);
+                 workerrotate=imrotate(workerimage,-sita);
+                 alpharotate=imrotate(alpha,-sita);
                 
-                x_scale=obj.scale_coef*[-1 1]*size(workerrotate,2)+obj.trajectory_x(time);
-                y_scale=obj.scale_coef*[-1 1]*size(workerrotate,1)+obj.trajectory_y(time);
+                x_scale=obj.scale_coef*.7*[-1 1]*size(workerrotate,2)+obj.trajectory_x(time);
+                y_scale=obj.scale_coef*.7*[-1 1]*size(workerrotate,1)+obj.trajectory_y(time);
                 
                 obj.figure_handle=image(workerrotate,'XData',x_scale,'YData',y_scale);
-                set(obj.figure_handle,'AlphaData',alpharotate);
+                 set(obj.figure_handle,'AlphaData',alpharotate);
                
             end
         hold on    

@@ -3,22 +3,23 @@ close all
 
 mmm = 0;
 % for nnn = [1 1 1 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5]
- for nnn = [3]
+nnn = [3];
 mmm = mmm+1;
 tic;
 map = Map('map_mh370.bmp','resolution',10,'hieght',200);
 
 % map.show('border')
 represent(map)
-userConfig.xy=map.mission_location;
+ lawn_mower(map)
+userConfig.xy=map.mission_location*.6;
 userConfig.minTour=floor(size(userConfig.xy,1)/nnn);
-userConfig.popSize=800;
+userConfig.popSize=4000;
 userConfig.nSalesmen= nnn;
 userConfig.batteryLife = 10;
-userConfig.numIter = 5e3*1;
+userConfig.numIter = 5e3*10;
 % a = opti_stations(userConfig);
-a = position_ga(userConfig);
-computation_time = toc
+a = position_ga_static(userConfig);
+computation_time = toc/60/60
 figure (1)
 hold on 
 contour(map.matrix,1,'black','linewidth',5)
@@ -35,6 +36,8 @@ contour(map.matrix,1,'black','linewidth',5)
 
 %  scatter(a.xy(a.optRoute(pick),1),a.xy(a.optRoute(pick),2))
 
+% for MH370 
+
 
 route = a.optRoute;
 breaks = a.optBreak;
@@ -50,7 +53,7 @@ dmat = reshape(sqrt(sum((ends(ab,:)-ends(ab',:)).^2,2)),nPoints,nPoints);
 
 % Find number of neighbor points of charging stations
 
-numNeighbor = sum(dmat<=sqrt(2));
+numNeighbor = sum(dmat<=sqrt(4));
 
 % Find isolated stations
 
@@ -70,7 +73,7 @@ for i = maxNeighbor:-1:2
 	while sum(numNeighbor == i) ~=0
 		temp = find(numNeighbor == i );
 		thisStation = a.optStations(temp(1));
-		tempp = find( dmat(temp(1),:) <=sqrt(2) & dmat(temp(1),:) > 0);
+		tempp = find( dmat(temp(1),:) <=sqrt(4) & dmat(temp(1),:) > 0);
 		
 		thisEmpty = a.optStations(tempp); 
 		for k = 1: length(thisEmpty)
@@ -104,7 +107,7 @@ end
 % Plot 
 N = length(route);
 rng = [[1 newBreak+1];[newBreak N]]';
-clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
+clr = [1 0 0; 0 0 1; 1 0 1; 0 1 0; 1 0.5 0];
 figure,
 hAx = gca;
 for s = 1:a.nSalesmen
@@ -125,17 +128,18 @@ end
 % Calculate Multiobjective cost
 fun = 1/4*(totalDist/size(a.xy,1))+1/4*(totalTime/userConfig.batteryLife)+1/4*(a.nSalesmen/1)+1/4*(length(Stations)/1);
 plot(a.xy(Stations,1),a.xy(Stations,2),'k^', 'linewidth', 2,'MarkerSize',10,'MarkerFaceColor','k')
-xlabel('X(km)')
-ylabel('Y(km)')
 
 
+figure
+ [cc hh] = contour(map.matrix,1,'black','linewidth',2);
+ cc = cc (:,2:end)*.6;
+ 
 % legend('Robot #1 Trajectory','Robot #2 Trajectory','Robot #3 Trajectory','Robot #4 Trajectory','Robot #5 Trajectory','Charging Stations')
 % legend('boxoff')
  title(hAx,sprintf('Total Distance = %1.2f, Time = %1.2f, N_w = %d, N_c = %d, fun = %1.2f',totalDist,totalTime,a.nSalesmen,length(Stations),fun ));
 hold(hAx,'off');
 figure (3)
  hold on 
- contour(map.matrix,1,'black','linewidth',5)
+ plot (cc (1,:),cc(2,:),'k','Linewidth',2)
 
 recordFun(mmm,:) = [totalDist,totalTime,a.nSalesmen,length(Stations),fun ];
-end

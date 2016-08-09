@@ -188,7 +188,7 @@ function varargout = position_ga(varargin)
     
     % Select the Colors for the Plotted Routes
     pclr = ~get(0,'DefaultAxesColor');
-    clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
+    clr = [1 0 0; 0 0 1; 1 0 1; 0 1 0; 1 0.5 0];
     if nSalesmen > 5
         clr = hsv(nSalesmen);
     end
@@ -226,28 +226,51 @@ function varargout = position_ga(varargin)
 
                 temp(s)=d;
             end
-            
-%              xz = [1 11 2 12 3 13 4 14 5 15 6 16 7 17 8 18 9 19 10 20]; %
-%             2 auvs
-               xz = [1 7 13 2 8 14 3 9 15 4 10 16 5 11 17 6 12 18];
-               %                 3 auvs
-               %                 xz = 1:20;
-               %             for j = 1:numStations(p)-1
-               for j = 1:numStations(p)
-                   for jj = 1:numStations(p)
-                       % for static
-                       %                  ds = ds + dmat(pStation(xz(j)),pStation(xz(j+1)));
-                       %                  2 and 3 auvs
-%                        if dmat(pStation(j),pStation(jj)) < 10
-                       ds = ds + dmat(pStation(j),pStation(jj));
-                       %                     1 auv
-%                        end
-                   end
-               end
+%%     mobile       
+%  xz = [1 11 2 12 3 13 4 14 5 15 6 16 7 17 8 18 9 19 10 20]; %
+ xz = [1 4 2 5 3 6 ];
+% 2 auvs
+%   xz = [1 7 13 2 8 14 3 9 15 4 10 16 5 11 17 6 12 18];
+%     3 auvs
+%          xz = 1:20;
+for j = 1:numStations(p)-1
+    
+    
+    % for static
+    ds = ds + dmat(pStation(xz(j)),pStation(xz(j+1)));
+    %                  2 and 3 auvs
+%       ds = ds + dmat(pStation(j),pStation(j+1));
+    %                     1 auv
+
+end
+
+% add the deploy distance
+  
+%     ds = ds + dmat(pRoute(1),pRoute(pBreak(1)+1)) + dmat(pRoute(pBreak(1)+1),pRoute(pBreak(2)+1))+ dmat(pRoute(pBreak(2)+1),pStation(1));
+ds = ds + dmat(pRoute(1),pRoute(pBreak(1)+1)) + dmat(pRoute(pBreak(1)+1),pStation(1));
                    % ds = ds + dmat(pStation(end),pStation(1)); % efficient for one station scenario
+                   
+%% static
+%                     for ii = 0 : 2
+%                         for j = 1+4*ii:floor(numStations(p)/4)*(1+ii)
+%                             for jj = 1+4*ii:floor(numStations(p)/4)*(1+ii)
+%                                 ds = ds + dmat(pStation(j),pStation(jj));
+%                             end
+%                         end
+%                     end
+%                     
+%                     for j = floor(numStations(p)/4)*(1+ii)+1:numStations(p)
+%                             for jj = floor(numStations(p)/4)*(1+ii)+1:numStations(p)
+%                                 ds = ds + dmat(pStation(j),pStation(jj));
+%                             end
+%                      end
+                    
+                    %%
+
+
                    totalDist(p) = sum(temp);
                    totalTime(p) = max(temp);
-                   fun(p) = 0.5*sum(temp)+0.03*ds; %1 and 0.8 default
+                   fun(p) = 0.5*max(temp)+0.10*ds; %
                end
         
         % Find the Best Route in the Population
@@ -387,7 +410,8 @@ function varargout = position_ga(varargin)
             'optBreak',    optBreak, ...
             'optStations',    optStations, ...
             'minTime',     minTime, ...
-            'minDist',     minDist);
+            'minDist',     minDist, ...
+            'globalMin',    globalMin);
         
         varargout = {resultStruct};
     end
@@ -414,13 +438,13 @@ function [numStations indexStations] = find_stations(route,breaks) %Bing added n
         % Calculate length of each route
         lbreaks=diff([1 breaks n]);
         
-        nStations(1)= floor(lbreaks(1)/batteryLife-0.000001);
+        nStations(1)= floor(lbreaks(1)/batteryLife-0.000001); 
         
-        templm=ones(1,nStations(1))*batteryLife;
+        templm=ones(1,nStations(1))*batteryLife; 
         if isempty(templm) == 1
             indexStations=[];
         else
-            templm(1)=0+batteryLife;
+            templm(1)=0+batteryLife/2;%fix timing
             indexStations=cumsum(templm);
         end
         for i = 2 : length(lbreaks)

@@ -18,7 +18,7 @@ classdef OperatingRobot <handle
         trajectory_power
         battery_life=50 % in number of timesteps switch to 50 for circle
         charging_period_time
-        max_speed=.2 % how to difine? switch to 2 for the circle scenario
+        max_speed=.086 % how to difine? switch to 2 for the circle scenario
         power_level
         battery_drain_rate
         recharge_window_max_level
@@ -30,6 +30,7 @@ classdef OperatingRobot <handle
         alert_level=.4;
         critical_level=0.1;
         meeting_times=[];
+        color_auv;
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     methods (Access=public)
@@ -50,6 +51,13 @@ classdef OperatingRobot <handle
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function has_trajectory = hasTrajectory(obj)
             has_trajectory = ~isempty(obj.trajectory_x)&~isempty(obj.trajectory_y);
+        end
+        function set_speed(obj, max_speed)
+            obj.max_speed = max_speed;
+        end
+        
+        function set_color(obj, color)
+            obj.color_auv = color;
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function setTrajectoryBarzinEdition(obj,position_x,position_y,position_description)
@@ -147,30 +155,30 @@ classdef OperatingRobot <handle
                     temp_charged=find(charged);
                     temp_charged=temp_charged(find(temp_charged<=obj.battery_life*i & temp_charged>obj.battery_life*(i-1)));
                     indeces_to_plot=[temp_charged min(max(temp_charged)+1,obj.simulation_time)];
-                    plot(obj.trajectory_x(indeces_to_plot),obj.trajectory_y(indeces_to_plot),'b','LineWidth',3);
+                    plot(obj.trajectory_x(indeces_to_plot),obj.trajectory_y(indeces_to_plot),'Color',obj.color_auv,'LineWidth',3);
                     
                     temp_alert=find(alert);
                     temp_alert=temp_alert(find(temp_alert<=obj.battery_life*i & temp_alert>obj.battery_life*(i-1)));
                     indeces_to_plot=temp_alert;
-                    plot(obj.trajectory_x(indeces_to_plot),obj.trajectory_y(indeces_to_plot),'b','LineWidth',3);
+                    plot(obj.trajectory_x(indeces_to_plot),obj.trajectory_y(indeces_to_plot),'Color',obj.color_auv,'LineWidth',3);
                     
                     temp_critical=find(critical);
                     temp_critical=temp_critical(find(temp_critical<=obj.battery_life*i & temp_critical>obj.battery_life*(i-1)));
                     indeces_to_plot=[min(temp_critical)-1 temp_critical min(max(temp_critical)+1,obj.simulation_time)];
-                    plot(obj.trajectory_x(indeces_to_plot),obj.trajectory_y(indeces_to_plot),'b','LineWidth',3); 
+                    plot(obj.trajectory_x(indeces_to_plot),obj.trajectory_y(indeces_to_plot),'Color',obj.color_auv,'LineWidth',3); 
                     % set(handle_of_sim,'XTickLabel',[])
 
                 end
             case 2
                 if ishandle(obj.figure_handle) delete(obj.figure_handle);end
-                [workerimage,~,alpha]=imread('or.png');
+                [workerimage,~,alpha]=imread('Bluefin.png');
                 if time==1
                     p1=[obj.trajectory_x(time+1) obj.trajectory_y(time+1)];
                 else
                     p1=[obj.trajectory_x(time-1) obj.trajectory_y(time-1)];
                 end
                 p2=[obj.trajectory_x(time) obj.trajectory_y(time)];
-                sita = atan2(p2(2)-p1(2),p2(1)-p1(1))*180/pi+3;
+                sita = atan2(p2(2)-p1(2),p2(1)-p1(1))*180/pi;
                 if isnan(sita)
                     sita=0;
                 end
